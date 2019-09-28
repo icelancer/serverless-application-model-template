@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Lambda/Code Pipeline Artifact Bucket
+##########################################
+Parameters:
+##########################################
+  DeployBucketName:
+    Type: String
+    Description: Enter Lambda Bucket Name (Lambda artifact location)
+
+##########################################
+Resources:
+##########################################
+  DeployS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref DeployBucketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: '람다 배포 산출물 저장'
+            Status: "Enabled"
+            ExpirationInDays: 1
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+Outputs:
+  LambdaBucket:
+    Description: 'Deploy Artifacts S3 Bucket'
+    Value: !Ref DeployS3Bucket
+    Export:
+      Name: !Ref DeployBucketName

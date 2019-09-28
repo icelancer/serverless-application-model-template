@@ -1,0 +1,4 @@
+[{
+  "ParameterKey": "DeployBucketName",
+  "ParameterValue": "deploy-artifacts"
+}]

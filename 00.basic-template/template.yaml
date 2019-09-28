@@ -6,7 +6,7 @@ Resources:
     Type: AWS::Serverless::Function
 
     Properties:
-
+      FunctionName: hello-sam
       # This function uses the Nodejs v10.x runtime.
       Runtime: nodejs10.x
 
