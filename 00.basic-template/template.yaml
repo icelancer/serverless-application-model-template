@@ -27,3 +27,14 @@ Resources:
           Properties:
             Path: /hello
             Method: Get
+
+Outputs:
+  HelloSamApi:
+    Description: "API Gateway endpoint URL for Prod stage for HelloSam function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello SAM Lambda Function ARN"
+    Value: !GetAtt HelloFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello SAM function"
+    Value: !GetAtt HelloFunction.Arn
