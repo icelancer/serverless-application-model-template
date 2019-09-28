@@ -1,0 +1,29 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+
+  HelloFunction:
+    # This resource creates a Lambda function.
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      # This function uses the Nodejs v10.x runtime.
+      Runtime: nodejs10.x
+
+      # This is the Lambda function's handler.
+      Handler: index.handler
+
+      # The location of the Lambda function code.
+      CodeUri: ./src
+
+      # Event sources to attach to this function. In this case, we are attaching
+      # one API Gateway endpoint to the Lambda function. The function is
+      # called when a HTTP request is made to the API Gateway endpoint.
+      Events:
+
+        HelloApi:
+          # Define an API Gateway endpoint that responds to HTTP GET at /hello
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: Get
