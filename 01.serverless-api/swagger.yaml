@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: Todo API
+  description: simple todo api
+  version: 1.0.0
+tags:
+  - name: todo
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+#servers:
+#  - url: icelancer.com
+
+paths:
+  /todo:
+    get:
+      tags:
+        - todo
+      summary: Return say ALL TODO
+      responses:
+        200:
+          description: 전체 TODO 목록을 반환한다.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TodoItem'
+                  totalCount:
+                    type: integer
+      x-amazon-apigateway-integration:
+        type: aws
+        httpMethod: GET
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TodoFunction.Arn}/invocations
+
+  /todo/{status}:
+    get:
+      tags:
+        - todo
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Status"
+      responses:
+        200:
+          description: 상태별 todo 아이템
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TodoItem'
+                  totalCount:
+                    type: integer
+      x-amazon-apigateway-integration:
+        type: aws
+        httpMethod: GET
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TodoFunction.Arn}/invocations
+        requestParameters:
+          integration.request.path.status: method.request.path.status
+
+components:
+  schemas:
+    TodoItem:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+    Status:
+      type: string
+      enum:
+        - todo
+        - inprogress
+        - done

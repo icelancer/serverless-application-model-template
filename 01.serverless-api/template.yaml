@@ -1,0 +1,121 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  APIGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+#     Issue: https://github.com/awslabs/serverless-application-model/issues/305
+#      DefinitionUri: Path: swagger.yaml
+      DefinitionBody:
+        openapi: 3.0.0
+        info:
+          title: Todo API
+          description: simple todo api
+          version: 1.0.0
+        tags:
+          - name: todo
+            description: Everything about your Pets
+            externalDocs:
+              description: Find out more
+              url: http://swagger.io
+        paths:
+          /todo:
+            get:
+              tags:
+                - todo
+              summary: Return say ALL TODO
+              responses:
+                '200':
+                  description: 전체 TODO 목록을 반환한다.
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/TodoItem'
+                          totalCount:
+                            type: integer
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TodoFunction.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+
+          /todo/{status}:
+            get:
+              tags:
+                - todo
+              parameters:
+                - name: status
+                  in: path
+                  required: true
+                  schema:
+                    $ref: "#/components/schemas/Status"
+              responses:
+                "200":
+                  description: 상태별 todo 아이템
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/TodoItem'
+                          totalCount:
+                            type: integer
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TodoFunction.Arn}/invocations
+                requestParameters:
+                  integration.request.path.status: method.request.path.status
+                responses:
+                  default:
+                    statusCode: 200
+
+        components:
+          schemas:
+            TodoItem:
+              type: object
+              properties:
+                title:
+                  type: string
+                status:
+                  $ref: "#/components/schemas/Status"
+            Status:
+              type: string
+              enum:
+                - todo
+                - inprogress
+                - done
+
+
+  TodoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: simple-todo
+      Runtime: nodejs10.x
+      Handler: index.handler
+      CodeUri: ./src
+      Events:
+        getTodos:
+          Type: Api
+          Properties:
+            RestApiId: !Ref APIGateway
+            Path: /todo
+            Method: GET
+        getTodoByStatus:
+          Type: Api
+          Properties:
+            RestApiId: !Ref APIGateway
+            Path: /todo/{status}
+            Method: GET
+
