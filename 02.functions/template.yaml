@@ -1,0 +1,41 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  CloneImageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: aws-clone-image-bucket
+
+  ImageCloneFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: CloneImageBucket
+    Properties:
+      FunctionName: image-clone
+      Runtime: nodejs10.x
+      Handler: index.handler
+      CodeUri: ./src
+      MemorySize: 128
+      Timeout: 15
+      Policies:
+        - AWSLambdaExecute
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:CopyObject
+              Resource: arn:aws:s3:::aws-clone-image-bucket/*
+
+      Events:
+        PhotoUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref CloneImageBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: images
+
+# sam build
+# sam package --output-template packaged.yaml --s3-bucket beauty-deploy-artifacts
+# sam deploy --template-file packaged.yaml --region ap-northeast-2 --capabilities CAPABILITY_IAM --stack-name icelancer-sam-function
