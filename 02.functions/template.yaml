@@ -7,7 +7,6 @@ Resources:
 
   ImageCloneFunction:
     Type: AWS::Serverless::Function
-    DependsOn: CloneImageBucket
     Properties:
       FunctionName: image-clone
       Runtime: nodejs10.x
