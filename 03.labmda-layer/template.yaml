@@ -1,0 +1,40 @@
+Transform: AWS::Serverless-2016-10-31
+#Description:
+Resources:
+  ImageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: icelancer-image-bucket
+
+  SharpLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: SharpLayer
+      ContentUri: ./sharp-layer
+      Description: Sharp Image Processing Library
+      CompatibleRuntimes:
+        - nodejs10.x
+      RetentionPolicy: Delete
+
+  ImageResizeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: image-resize
+      Runtime: nodejs10.x
+      Handler: index.handler
+      CodeUri: ./image-resize
+      MemorySize: 128
+      Timeout: 15
+      Layers:
+        - !Ref SharpLayer
+      Policies:
+        - AWSLambdaExecute
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:CopyObject
+              Resource: arn:aws:s3:::icelancer-image-bucket/*
+
+# sam package --template-file template.yaml --output-template packaged.yaml --s3-bucket beauty-deploy-artifacts
+# sam deploy --template-file packaged.yaml --region ap-northeast-2 --capabilities CAPABILITY_IAM --stack-name image-resize-with-layer
