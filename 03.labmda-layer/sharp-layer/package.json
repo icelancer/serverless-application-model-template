@@ -1,0 +1,16 @@
+{
+  "name": "sharp-layer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sharp-layer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm install && rm -rf node_modules/sharp && docker run -v \"$PWD\":/var/task lambci/lambda:build-nodejs10.x npm install"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.539.0",
+    "sharp": "^0.23.1"
+  }
+}
